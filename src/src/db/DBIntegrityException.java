@@ -1,4 +1,4 @@
-package demo_dao_jdbc.db;
+package src.db;
 
 public class DBIntegrityException extends RuntimeException{
 
