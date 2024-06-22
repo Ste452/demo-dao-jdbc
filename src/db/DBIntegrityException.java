@@ -1,4 +1,4 @@
-package src.db;
+package db;
 
 public class DBIntegrityException extends RuntimeException{
 
