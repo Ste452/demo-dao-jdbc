@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,8 +26,44 @@ public class SellerDaoJDBC implements SellerDao {
 	
 	@Override
 	public void insert(Seller obj) {
-		// TODO Auto-generated method stub
+		PreparedStatement st = null;
 		
+		try {
+			
+			st = conn.prepareStatement(
+					
+				"INSERT INTO Seller	(Name, Email, BirthDate, BaseSalary, DepartmentId, Qualities) VALUES "
+				+ "(?, ?, ?, ?, ?, ?)",
+				Statement.RETURN_GENERATED_KEYS);
+			
+			st.setString(1, obj.getName());
+			st.setString(2,  obj.getEmail());
+			st.setDate(3, new java.sql.Date(obj.getBirthDate().getTime()));
+			st.setDouble(4, obj.getBaseSalary());
+			st.setInt(5, obj.getDepartment().getId());
+			st.setString(6, obj.getQualities());
+		    int rowsAffected = st.executeUpdate();
+		    
+		    if (rowsAffected > 0) {
+		    	
+		    	ResultSet rs = st.getGeneratedKeys();
+		    	
+		    	if (rs.next()) {
+		    		int id = rs.getInt(1);
+		    		obj.setId(id);
+		    	}
+		    	
+		    	DB.closeResultSet(rs);
+		    	
+		    } else {
+		    	throw new DBException("Unexpected error! No rows Affected!");
+		    }
+		    
+		} catch(SQLException e) {		
+			throw new DBException(e.getMessage());
+		} finally {
+			DB.closeStatement(st);
+		}
 	}
 
 	@Override
@@ -78,6 +115,7 @@ public class SellerDaoJDBC implements SellerDao {
 		obj.setBaseSalary(rs.getDouble("BaseSalary"));
 		obj.setBirthDate(rs.getDate("BirthDate"));
 		obj.setDepartment(dep);
+		obj.setQualities(rs.getString("Qualities"));
 		return obj;
 	}
 
@@ -92,7 +130,7 @@ public class SellerDaoJDBC implements SellerDao {
 	public List<Seller> findAll() {
 		
 		PreparedStatement st = null;
-		  ResultSet rs = null;
+		 ResultSet rs = null;
 		  
 		  try {
 			  st = conn.prepareStatement(
@@ -171,5 +209,17 @@ public class SellerDaoJDBC implements SellerDao {
 		  DB.closeResultSet(rs);
 		  DB.closeStatement(st);
 	  }
+	}
+	
+	public void cleanSellerTable() {
+	    PreparedStatement st = null;
+	    try {
+	        st = conn.prepareStatement("TRUNCATE TABLE seller");
+	        st.executeUpdate();
+	    } catch (SQLException e) {
+	        throw new DBException(e.getMessage());
+	    } finally {
+	        DB.closeStatement(st);
+	    }
 	}
 }
