@@ -36,4 +36,5 @@ INSERT INTO seller (Name, Email, BirthDate, BaseSalary, DepartmentId, Qualities)
     ('Steve Vaz','Steve@gmail.com','2000-03-04 00:00:00',3000,2, 'Cientista da computação');
 
 
+DELETE FROM seller WHERE id IN (8, 9);
 
